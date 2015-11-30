@@ -1,0 +1,1 @@
+var plautiNgSlds = angular.module("plauti-ng-slds", []);
