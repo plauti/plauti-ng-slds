@@ -11,7 +11,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
     + "                <use xlink:href=\"{{searchSvgUrl}}\"><\/use>"
     + "            <\/svg>"
     + "            <div class=\"slds-pill__container slds-hide\"><\/div>"
-    + "            <input class=\"slds-input slds-show\" tabindex=\"{{tabOrder}}\" type=\"text\" ng-disabled=\"ngDisabled\" ng-model=\"searchText\" ng-change=\"queryChanged()\" ng-keydown=\"highlightOption($event)\" ng-click=\"$event.preventDefault(); $event.stopPropagation();\" \/>"
+    + "            <input class=\"slds-input slds-show\" tabindex=\"{{tabOrder}}\" type=\"text\" ng-disabled=\"ngDisabled\" ng-model=\"searchText\" ng-change=\"queryChanged()\" ng-keydown=\"highlightOption($event)\" \/>"
     + "        <\/div>"
     + "    <\/div>"
     + "    <div class=\"slds-lookup__menu\" role=\"listbox\" ng-show=\"dropActive\">"
@@ -70,7 +70,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 if (angular.isDefined(value)) {
                     $scope.searchText = value;
                 }
-                else if (!$scope.dropActive) {
+                else if (angular.isUndefined($scope.searchText)||$scope.searchText.length==0) {
                     $scope.searchText = "";
                 }
             });
