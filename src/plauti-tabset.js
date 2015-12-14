@@ -19,7 +19,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
 
             this.setTabTemplate = function (templateUrl) {
                 $scope.templateUrl = templateUrl;
-            }
+            };
 
             this.addTab = function (tab) {
                 if (tabs.length == 0) {
@@ -36,7 +36,8 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
   + '</div>'
   + '</div>',
     };
-})
+});
+
 plautiNgSlds.directive('plautiTab', function ($timeout) {
     return {
         restrict: 'E',
@@ -59,14 +60,15 @@ plautiNgSlds.directive('plautiTab', function ($timeout) {
 
             scope.select = function () {
                 scope.active = true;
-            }
+            };
 
             scope.deselect = function () {
                 scope.active = false;
-            }
+            };
+            
             if (scope.active) {
                 tabsetController.selectTab(scope);
-            }
+            };
 
             scope.scoped = tabsetController.scoped;
         },
