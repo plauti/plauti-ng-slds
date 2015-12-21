@@ -5,11 +5,11 @@ module.exports = function(grunt) {
         pkg : grunt.file.readJSON('package.json'),
         concat : {
             options: {
-                banner : '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner : '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> <%= pkg.license %> \n<%= pkg.description %> */\n'
                 
             },
             build : {
-                src : ['src/<%= pkg.name %>.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js', 'src/plauti-tabset.js'],
+                src : ['src/<%= pkg.name %>.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
                 dest : 'build/<%= pkg.name %>.js'
             }  
         },
@@ -24,7 +24,7 @@ module.exports = function(grunt) {
                 }
             },
             build : {
-                src : ['src/<%= pkg.name %>.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js', 'src/plauti-tabset.js'],
+                src : ['src/<%= pkg.name %>.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
                 dest : 'build/<%= pkg.name %>.min.js'
             }
 

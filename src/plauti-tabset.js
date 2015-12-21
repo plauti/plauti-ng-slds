@@ -72,7 +72,7 @@ plautiNgSlds.directive('plautiTab', function ($timeout) {
 
             scope.scoped = tabsetController.scoped;
         },
-        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}">{{ title }}</a></li>',
+        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}" ng-bind-html="title"></a></li>',
 
     };
 });

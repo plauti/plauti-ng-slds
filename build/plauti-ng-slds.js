@@ -1,59 +1,118 @@
-/*! plauti-ng-slds 2015-12-14 */
+/*! plauti-ng-slds 0.0.1 2015-12-21 GPL-3.0 
+Angular Directives for Lightning Design System */
 var plautiNgSlds = angular.module("plauti-ng-slds", []);
-plautiNgSlds.directive('plautiMultiSelect', function () {
+plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
     return {
         restrict: 'E',
         replace: true,
-        require: 'ngModel',
-        scope: {
-            options: '=',
-            ngModel: '=',
-            ngDisabled: '=',
-            required: '@',
-            nameAttr: '@',
-            valueAttr: '@',
-            ngChange: '&',
-            svgPath: '@',
-            defaultText: '@'
+        transclude: true,
+        scope:{scoped:'='},
+        controller: function ($scope) {
+            $scope.templateUrl = '';
+            var tabs = $scope.tabs = [];
+            this.scoped = $scope.scoped;
+
+            this.selectTab = function (tab) {
+                angular.forEach(tabs, function (tab) {
+                    tab.active = false;
+                });
+                tab.active = true;
+                $scope.templateUrl = tab.templateUrl;
+            };
+
+            this.setTabTemplate = function (templateUrl) {
+                $scope.templateUrl = templateUrl;
+            };
+
+            this.addTab = function (tab) {
+                if (tabs.length == 0) {
+                    tab.active = true;
+                }
+                tabs.push(tab);
+            };
         },
-        template: '<div class="slds slds-picklist" aria-expanded="true">'
-    + '<button class="slds-button slds-button--neutral slds-picklist__label plauti-select-button" style="width:100%" aria-haspopup="true" ng-click="toggleDropdown($event)" aria-disabled="{{$parent.ngDisabled}}" ng-disabled="ngDisabled">'
-        + '<span class="slds-truncate">{{buttonText}}</span>'
-        + '<svg aria-hidden="true" class="slds-icon">'
-            + '<use xlink:href="{{downSvgUrl}}"></use>'
-        + '</svg>'
-    + '</button>'
-    + '<div class="slds-dropdown slds-dropdown--left slds-dropdown--menu" style="width:100%; max-width:100%" ng-show="dropVisible">'
-        + '<ul class="slds-dropdown__list" role="menu">'
-            + '<li ng-repeat="option in options track by $index"  class="slds-dropdown__item" ng-class="{true:\'slds-is-selected\'}[option.$$selected==true]" ng-click="toggleSelection(option,$event)" aria-disabled="{{$parent.ngDisabled}}">'
-                + '<a href="javascript:void(0)" role="menuitemradio" >'
-                    + '<p class="slds-truncate">'
-                        + '<svg aria-hidden="true" class="slds-icon slds-icon--selected slds-icon--x-small slds-icon-text-default slds-m-right--x-small">'
-                            + '<use xlink:href="{{$parent.checkSvgUrl}}"></use>'
-                        + '</svg>{{option[nameAttr]}}'
-                    + '</p>'
-                + '</a>'
-            + '</li>'
-        + '</ul>'
-    + '</div>'
-+ '</div>',
-        link: function ($scope, iElm, iAttr, mdlCtrl) {
-            $scope.$watchCollection('options', function () {
+        template: '<div ng-class="{\'slds-tabs--scoped\':scoped,\'slds-tabs--default\':!scoped}">'
+  + '<ul ng-class="{\'slds-tabs--scoped__nav\':scoped,\'slds-tabs--default__nav\':!scoped}" role="tablist" ng-transclude>'
+  + '</ul>'
+  + '<div class="slds-show" ng-class="{\'slds-tabs--scoped__content\':scoped,\'slds-tabs--default__content\':!scoped}" role="tabpanel">'
+  + '<ng-include src="templateUrl"></ng-include>'
+  + '</div>'
+  + '</div>',
+    };
+});
+
+plautiNgSlds.directive('plautiTab', function ($timeout) {
+    return {
+        restrict: 'E',
+        replace: true,
+        require: '^plautiTabset',
+        scope: {
+            title: '@',
+            templateUrl: '@',
+            active: '=?'
+        },
+        link: function (scope, element, attrs, tabsetController) {
+            scope.$watch('active', function (newValue, oldValue) {
+                if (newValue && !oldValue) {
+                    tabsetController.selectTab(scope);
+                }
+            });
+
+
+            tabsetController.addTab(scope);
+
+            scope.select = function () {
+                scope.active = true;
+            };
+
+            scope.deselect = function () {
+                scope.active = false;
+            };
+            
+            if (scope.active) {
+                tabsetController.selectTab(scope);
+            };
+
+            scope.scoped = tabsetController.scoped;
+        },
+        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}" ng-bind-html="title"></a></li>',
+
+    };
+});
+
+plautiNgSlds.directive('plautiMultiSelect', function() {
+    return {
+        restrict : 'E',
+        replace : true,
+        require : 'ngModel',
+        scope : {
+            options : '=',
+            ngModel : '=',
+            ngDisabled : '=',
+            required : '@',
+            nameAttr : '@',
+            valueAttr : '@',
+            ngChange : '&',
+            svgPath : '@',
+            defaultText : '@'
+        },
+        template : '<div class="slds slds-picklist" aria-expanded="true">' + '<button class="slds-button slds-button--neutral slds-picklist__label plauti-select-button" style="width:100%" aria-haspopup="true" ng-click="toggleDropdown($event)" aria-disabled="{{$parent.ngDisabled}}" ng-disabled="ngDisabled">' + '<span class="slds-truncate">{{buttonText}}</span>' + '<svg aria-hidden="true" class="slds-icon">' + '<use xlink:href="{{downSvgUrl}}"></use>' + '</svg>' + '</button>' + '<div class="slds-dropdown slds-dropdown--left slds-dropdown--menu" style="width:100%; max-width:100%" ng-show="dropVisible">' + '<ul class="slds-dropdown__list" role="menu">' + '<li ng-repeat="option in options track by $index"  class="slds-dropdown__item" ng-class="{true:\'slds-is-selected\'}[option.$$selected==true]" ng-click="toggleSelection(option,$event)" aria-disabled="{{$parent.ngDisabled}}">' + '<a href="javascript:void(0)" role="menuitemradio" >' + '<p class="slds-truncate">' + '<svg aria-hidden="true" class="slds-icon slds-icon--selected slds-icon--x-small slds-icon-text-default slds-m-right--x-small">' + '<use xlink:href="{{$parent.checkSvgUrl}}"></use>' + '</svg>{{option[nameAttr]}}' + '</p>' + '</a>' + '</li>' + '</ul>' + '</div>' + '</div>',
+        link : function($scope, iElm, iAttr, mdlCtrl) {
+            $scope.$watchCollection('options', function() {
                 $scope.applyTranformations();
             });
 
-            $scope.$watchCollection('ngModel', function (newValue, oldValue) {
+            $scope.$watchCollection('ngModel', function(newValue, oldValue) {
                 $scope.applyTranformations();
 
                 if ((newValue == undefined || newValue.length == 0) && $scope.required) {
                     mdlCtrl.$setValidity("required", false);
-                }
-                else {
+                } else {
                     mdlCtrl.$setValidity("required", true);
                 }
             });
         },
-        controller: function ($scope, $document, $log, $filter, $timeout) {
+        controller : function($scope, $document, $log, $filter, $timeout) {
             if (angular.isUndefined($scope.svgPath)) {
                 $scope.svgPath = "/assets/icons/utility-sprite/svg/symbols.svg";
             }
@@ -68,22 +127,26 @@ plautiNgSlds.directive('plautiMultiSelect', function () {
                 $scope.defaultText = 'Select an Option';
             };
 
-            $scope.toggleDropdown = function (evt) {
+            $scope.toggleDropdown = function(evt) {
                 //This is to tackle multiple dropdowns on a single page. This will avoid multiple drops to be visible simultaneously!
                 var visibilityToSet = !$scope.dropVisible;
-                $timeout(function () { $scope.dropVisible = visibilityToSet });
+                $timeout(function() {
+                    $scope.dropVisible = visibilityToSet;
+                });
             };
 
-            $document.on('click', function () {
-                $scope.$apply(function () { $scope.dropVisible = false; });
+            $document.on('click', function() {
+                $scope.$apply(function() {
+                    $scope.dropVisible = false;
+                });
             });
 
-            $scope.applyTranformations = function () {
+            $scope.applyTranformations = function() {
                 $scope.setSelectedOptions();
                 $scope.setButtonText();
             };
 
-            $scope.setSelectedOptions = function () {
+            $scope.setSelectedOptions = function() {
                 if (angular.isUndefined($scope.options))
                     return;
                 for (var i = 0; i < $scope.options.length; i++) {
@@ -94,30 +157,28 @@ plautiNgSlds.directive('plautiMultiSelect', function () {
                 }
             };
 
-            $scope.setButtonText = function () {
+            $scope.setButtonText = function() {
                 if ($scope.ngModel == undefined || !angular.isArray($scope.ngModel) || $scope.ngModel.length == 0) {
                     $scope.buttonText = $scope.defaultText;
-                }
-                else if (angular.isArray($scope.ngModel) && $scope.ngModel.length == 1) {
+                } else if (angular.isArray($scope.ngModel) && $scope.ngModel.length == 1) {
                     var selectedOption = $filter('filter')($scope.options, { $$selected: true })[0];
                     $scope.buttonText = selectedOption[$scope.nameAttr];
-                }
-                else if (angular.isArray($scope.ngModel) && $scope.ngModel.length > 1) {
-                    var selectedOptions = $filter('filter')($scope.options, { $$selected: true });
+                } else if (angular.isArray($scope.ngModel) && $scope.ngModel.length > 1) {
+                    var selectedOptions = $filter('filter')($scope.options, {
+                        $$selected : true
+                    });
                     var buttonText = selectedOptions[0][$scope.nameAttr];
                     for (var i = 1; i < selectedOptions.length; i++) {
                         buttonText += ", " + selectedOptions[i][$scope.nameAttr];
                     }
                     $scope.buttonText = buttonText;
-                }
-                else {
+                } else {
                     $log.error('Plauti Multi-Select Directive: "ng-model" value must be undefined or an array object.');
-                };
+                }
+                ;
             };
 
-
-
-            $scope.toggleSelection = function (option, evt) {
+            $scope.toggleSelection = function(option, evt) {
                 //need to stop event propagation even in case select is disabled
                 evt.stopPropagation();
 
@@ -137,11 +198,11 @@ plautiNgSlds.directive('plautiMultiSelect', function () {
                 else
                     $scope.ngModel.splice(index, 1);
 
-
-                $timeout(function () { $scope.ngChange(); });
+                $timeout(function() {
+                    $scope.ngChange();
+                });
 
             };
-
 
             function indexOf(array, item) {
                 for (var i = 0; i < array.length; i++) {
@@ -152,10 +213,9 @@ plautiNgSlds.directive('plautiMultiSelect', function () {
             };
 
         }
+    };
 
-    }
-
-});
+}); 
 plautiNgSlds.directive('plautiPickList', function () {
 
     return {
@@ -1128,83 +1188,5 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.init();
         }
-    };
-});
-plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
-    return {
-        restrict: 'E',
-        replace: true,
-        transclude: true,
-        scope:{scoped:'='},
-        controller: function ($scope) {
-            $scope.templateUrl = '';
-            var tabs = $scope.tabs = [];
-            this.scoped = $scope.scoped;
-
-            this.selectTab = function (tab) {
-                angular.forEach(tabs, function (tab) {
-                    tab.active = false;
-                });
-                tab.active = true;
-                $scope.templateUrl = tab.templateUrl;
-            };
-
-            this.setTabTemplate = function (templateUrl) {
-                $scope.templateUrl = templateUrl;
-            };
-
-            this.addTab = function (tab) {
-                if (tabs.length == 0) {
-                    tab.active = true;
-                }
-                tabs.push(tab);
-            };
-        },
-        template: '<div ng-class="{\'slds-tabs--scoped\':scoped,\'slds-tabs--default\':!scoped}">'
-  + '<ul ng-class="{\'slds-tabs--scoped__nav\':scoped,\'slds-tabs--default__nav\':!scoped}" role="tablist" ng-transclude>'
-  + '</ul>'
-  + '<div class="slds-show" ng-class="{\'slds-tabs--scoped__content\':scoped,\'slds-tabs--default__content\':!scoped}" role="tabpanel">'
-  + '<ng-include src="templateUrl"></ng-include>'
-  + '</div>'
-  + '</div>',
-    };
-});
-
-plautiNgSlds.directive('plautiTab', function ($timeout) {
-    return {
-        restrict: 'E',
-        replace: true,
-        require: '^plautiTabset',
-        scope: {
-            title: '@',
-            templateUrl: '@',
-            active: '=?'
-        },
-        link: function (scope, element, attrs, tabsetController) {
-            scope.$watch('active', function (newValue, oldValue) {
-                if (newValue && !oldValue) {
-                    tabsetController.selectTab(scope);
-                }
-            });
-
-
-            tabsetController.addTab(scope);
-
-            scope.select = function () {
-                scope.active = true;
-            };
-
-            scope.deselect = function () {
-                scope.active = false;
-            };
-            
-            if (scope.active) {
-                tabsetController.selectTab(scope);
-            };
-
-            scope.scoped = tabsetController.scoped;
-        },
-        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}">{{ title }}</a></li>',
-
     };
 });
