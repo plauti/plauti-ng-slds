@@ -3,30 +3,50 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
         restrict: 'E',
         replace: true,
         transclude: true,
-        scope:{scoped:'='},
-        controller: function ($scope) {
+        scope: { scoped: '=', activeTab: '=?' },
+        controller: function ($scope, $filter) {
+
             $scope.templateUrl = '';
             var tabs = $scope.tabs = [];
             this.scoped = $scope.scoped;
 
-            this.selectTab = function (tab) {
+            $scope.activateTab = function (tabToActivate) {
                 angular.forEach(tabs, function (tab) {
                     tab.active = false;
                 });
-                tab.active = true;
-                $scope.templateUrl = tab.templateUrl;
+                tabToActivate.active = true;
+                $scope.templateUrl = tabToActivate.templateUrl;
             };
 
-            this.setTabTemplate = function (templateUrl) {
-                $scope.templateUrl = templateUrl;
-            };
+            $scope.$watch('activeTab', function (newValue, oldValue) {
+                if (angular.isUndefined(newValue))
+                    return;
+
+                var tabToActivate = $filter('filter')($scope.tabs, { title: newValue });
+                if (tabToActivate.length == 1) {
+                    $scope.activateTab(tabToActivate[0]);
+                }
+
+            });
 
             this.addTab = function (tab) {
-                if (tabs.length == 0) {
-                    tab.active = true;
-                }
                 tabs.push(tab);
+                if (tabs.length == 1 && angular.isUndefined($scope.activeTab)) {
+                    $scope.activeTab = tab.title;
+                }
+                else if (tab.title == $scope.activeTab) {
+                    this.activateTab(tab);
+                }
+
             };
+
+            this.selectTab = function (tab) {
+                $scope.activeTab = tab.title;
+            };
+
+            
+
+            
         },
         template: '<div ng-class="{\'slds-tabs--scoped\':scoped,\'slds-tabs--default\':!scoped}">'
   + '<ul ng-class="{\'slds-tabs--scoped__nav\':scoped,\'slds-tabs--default__nav\':!scoped}" role="tablist" ng-transclude>'
@@ -36,8 +56,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
   + '</div>'
   + '</div>',
     };
-});
-
+})
 plautiNgSlds.directive('plautiTab', function ($timeout) {
     return {
         restrict: 'E',
@@ -45,34 +64,16 @@ plautiNgSlds.directive('plautiTab', function ($timeout) {
         require: '^plautiTabset',
         scope: {
             title: '@',
-            templateUrl: '@',
-            active: '=?'
+            templateUrl: '@'
         },
         link: function (scope, element, attrs, tabsetController) {
-            scope.$watch('active', function (newValue, oldValue) {
-                if (newValue && !oldValue) {
-                    tabsetController.selectTab(scope);
-                }
-            });
-
-
-            tabsetController.addTab(scope);
-
+          tabsetController.addTab(scope);
             scope.select = function () {
-                scope.active = true;
-            };
-
-            scope.deselect = function () {
-                scope.active = false;
-            };
-            
-            if (scope.active) {
                 tabsetController.selectTab(scope);
-            };
-
+            }
             scope.scoped = tabsetController.scoped;
         },
-        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}" ng-bind-html="title"></a></li>',
+        template: '<li class="slds-text-heading--label"  ng-class="{\'slds-active\':active,\'slds-tabs--scoped__item\':scoped,\'slds-tabs--default__item\':!scoped}" title="{{title}}" role="presentation"><a ng-class="{\'slds-tabs--scoped__link\':scoped,\'slds-tabs--default__link\':!scoped}" ng-click="select()" href="#" role="tab" aria-selected="{{active}}">{{ title }}</a></li>',
 
     };
 });
