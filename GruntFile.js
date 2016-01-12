@@ -9,7 +9,7 @@ module.exports = function(grunt) {
                 
             },
             build : {
-                src : ['src/<%= pkg.name %>.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
+                src : ['src/<%= pkg.name %>.js', 'src/plauti-modal.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
                 dest : 'build/<%= pkg.name %>.js'
             }  
         },
@@ -24,7 +24,7 @@ module.exports = function(grunt) {
                 }
             },
             build : {
-                src : ['src/<%= pkg.name %>.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
+                src : ['src/<%= pkg.name %>.js', 'src/plauti-modal.js', 'src/plauti-tabset.js', 'src/plauti-multi-select.js', 'src/plauti-pick-list.js', 'src/plauti-time-picker.js', 'src/plauti-date-picker.js', 'src/plauti-date-time-picker.js', 'src/plauti-typeahead.js'],
                 dest : 'build/<%= pkg.name %>.min.js'
             }
 
