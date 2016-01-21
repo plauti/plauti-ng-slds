@@ -311,8 +311,11 @@ function ($modalStack ,  $q ,  $animate) {
               keyboard: modal.keyboard
           });
 
-          var body = $document.find('body').eq(0),
+          var parentEl = $document.find('body').eq(0),
               currBackdropIndex = backdropIndex();
+          if (angular.isDefined(modal.appendTo) && angular.isElement(modal.appendTo)) {
+              parentEl = modal.appendTo;
+          }
 
           if (currBackdropIndex >= 0 && !backdropDomEl) {
               backdropScope = $rootScope.$new(true);
@@ -323,7 +326,7 @@ function ($modalStack ,  $q ,  $animate) {
                   angularBackgroundDomEl.attr('modal-animation', 'true');
               }
               backdropDomEl = $compile(angularBackgroundDomEl)(backdropScope);
-              body.append(backdropDomEl);
+              parentEl.append(backdropDomEl);
           }
 
           var angularDomEl = angular.element('<div modal-window="modal-window"></div>');
@@ -341,8 +344,8 @@ function ($modalStack ,  $q ,  $animate) {
           var modalDomEl = $compile(angularDomEl)(modal.scope);
           openedWindows.top().value.modalDomEl = modalDomEl;
           openedWindows.top().value.modalOpener = modalOpener;
-          body.append(modalDomEl);
-          body.addClass(OPENED_MODAL_CLASS);
+          parentEl.append(modalDomEl);
+          parentEl.addClass(OPENED_MODAL_CLASS);
       };
 
       function broadcastClosing(modalWindow, resultOrReason, closing) {
@@ -488,7 +491,8 @@ function ($modalStack ,  $q ,  $animate) {
                           backdropClass: modalOptions.backdropClass,
                           windowClass: modalOptions.windowClass,
                           windowTemplateUrl: modalOptions.windowTemplateUrl,
-                          size: modalOptions.size
+                          size: modalOptions.size,
+                          appendTo: modalOptions.appendTo
                       });
 
                   }, function resolveError(reason) {
