@@ -78,15 +78,7 @@ plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
             uiSref:'@'
         },
         link: function ($scope, element, attrs, menuController) {
-            $scope.performAction = function () {
-                switch ($scope.actionType) {
-                    case 'link':
-                        $window.location.href = $scope.action;
-                    case 'click':
-                        $scope.$parent.$eval($scope.action + "()", {});
-                }
-            }
-
+		
             if(angular.isUndefined($scope.href))
             {
                 $scope.href = "javascript:void(0);"
