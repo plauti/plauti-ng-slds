@@ -73,7 +73,9 @@ plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
             title: '@',
             action: '@',
             actionType: '@',
-            iconurl:'@'
+            iconurl: '@',
+            href: '@',
+            uiSref:'@'
         },
         link: function ($scope, element, attrs, menuController) {
             $scope.performAction = function () {
@@ -85,9 +87,14 @@ plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
                 }
             }
 
+            if(angular.isUndefined($scope.href))
+            {
+                $scope.href = "javascript:void(0);"
+            }
+
         },
-        template:  "<li class=\"slds-dropdown__item\" ng-click=\"performAction()\">"
-   +"                    <a href=\"javascript:void(0)\">"
+        template:  "<li class=\"slds-dropdown__item\" >"
+   +"                    <a href=\"{{href}}\">"
    +"                        <p class=\"slds-truncate\">{{title}}<\/p>"
    +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"iconurl==undefined\">"
    +"                            <use xlink:href=\"{{iconurl}}\"><\/use>"
