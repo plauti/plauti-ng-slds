@@ -61,7 +61,7 @@ function ($animate ,  $modalStack) {
     return {
         restrict: 'EA',
         replace: true,
-        template: "<div aria-hidden=\"false\" role=\"dialog\" class=\"slds-modal slds-modal--large slds-fade-in-open-backdrop ng-scope\" data-reactid=\".7.0.0\"></div>\n" +
+        template: "<div aria-hidden=\"false\" role=\"dialog\" class=\"slds-modal slds-modal--large slds-fade-in-open-backdrop ng-scope\" ></div>\n" +
     "",
         compile: function (tElement, tAttrs) {
             tElement.addClass(tAttrs.backdropClass);
@@ -91,7 +91,7 @@ function ($modalStack ,  $q ,  $animate) {
         },
         replace: true,
         transclude: true,
-        template:"<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" aria-hidden=\"false\" role=\"dialog\" ng-class=\"size ? 'slds-modal--' + size : ''\" class=\"slds-modal slds-fade-in-open ng-scope\" data-reactid=\".7.0.0\"><div class=\"slds-modal__container\" data-reactid=\".7.0.0.0\" modal-transclude></div></div>",
+        template:"<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" aria-hidden=\"false\" role=\"dialog\" ng-class=\"size ? 'slds-modal--' + size : ''\" class=\"slds-modal slds-fade-in-open ng-scope\" ><div class=\"slds-modal__container\" modal-transclude></div></div>",
 
     //        "<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" role=\"dialog\" class=\"modal\"\n" +
     //"    modal-animation-class=\"fade\"\n" +

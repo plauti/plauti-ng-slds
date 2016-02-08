@@ -32,7 +32,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
             this.addTab = function (tab) {
                 tabs.push(tab);
                 if (tabs.length == 1 && angular.isUndefined($scope.activeTab)) {
-                    $scope.activeTab = tab.title;
+                    $scope.activeTab = tab.name;
                 }
                 else if (tab.name == $scope.activeTab) {
                     this.activateTab(tab);

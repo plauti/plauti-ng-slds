@@ -1,6 +1,90 @@
-/*! plauti-ng-slds 0.0.1 2016-01-12 GPL-3.0 
+/*! plauti-ng-slds 0.0.1 2016-02-08 GPL-3.0 
 Angular Directives for Lightning Design System */
 var plautiNgSlds = angular.module("plauti-ng-slds", []);
+plautiNgSlds.directive('plautiMenu', function () {
+    return {
+        restrict: 'E',
+        replace: true,
+        template:"<div>"
+   +"    <div ng-class=\"{'slds-dropdown-trigger':!ngDisabled}\">"
+   +"        <button class=\"slds-button slds-button--icon-border-filled\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
+   +"            <span>{{menuTitle}}<\/span>"
+   +"            <svg aria-hidden=\"true\" class=\"slds-button__icon slds-button__icon--hint\" ng-show=\"menuIconVisible\">"
+   +"                <use xlink:href=\"{{menuIconPath}}\"><\/use>"
+   +"            <\/svg>"
+   +"        <\/button>"
+   +""
+   +"        <div class=\"slds-dropdown slds-dropdown--menu\" ng-class=\"getClass()\" ng-hide=\"ngDisabled\">"
+   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" data-reactid=\".8.0.1.0\">"
+   +"                <li class=\"slds-dropdown__item\" ng-repeat=\"menuItem in menuItems\" ng-click=\"$parent.performAction(menuItem.action)\">"
+   +"                    <a href=\"javascript:void(0)\">"
+   +"                        <p class=\"slds-truncate\">{{menuItem.name}}<\/p>"
+   +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"menuItem.iconurl==undefined\">"
+   +"                            <use xlink:href=\"{{menuItem.iconurl}}\"><\/use>"
+   +"                        <\/svg>"
+   +"                    <\/a>"
+   +"                <\/li>"
+   +"            <\/ul>"
+   +"        <\/div>"
+   +"    <\/div>"
+   +"<\/div>",
+
+        scope: {
+            menuTitle: '@',
+            menuIcon: '@',
+            menuItems: '=',
+            svgPath: '@',
+            ngDisabled: '=',
+            position: '@',
+            actionType: '@'
+        },
+        link: function (scope, element, attrs) {
+
+        },
+        controller: function ($scope, $location, $window) {
+            $scope.init = function () {
+                if (angular.isUndefined($scope.svgPath)) {
+                    $scope.svgPath = "/assets/icons/utility-sprite/svg/symbols.svg";
+                }
+
+                if (angular.isDefined($scope.menuIcon)) {
+                    $scope.menuIconVisible = true;
+                    $scope.menuIconPath = $scope.svgPath + "#" + $scope.menuIcon;
+                }
+            }
+
+            $scope.getClass = function () {
+                switch ($scope.position) {
+                    case 'topLeft':
+                        return 'slds-dropdown--bottom slds-dropdown--left';
+                    case 'topMiddle':
+                        return 'slds-dropdown--bottom';
+                    case 'topRight':
+                        return 'slds-dropdown--bottom slds-dropdown--right';
+                    case 'bottomLeft':
+                        return 'slds-dropdown--left';
+                    case 'bottomMiddle':
+                        return '';
+                    case 'bottomRight':
+                        return 'slds-dropdown--right';
+
+                }
+            }
+
+            $scope.performAction = function (action) {
+                switch ($scope.actionType) {
+                    case 'link':
+                        $window.location.href = action;
+                    case 'click':
+                        $scope.$parent.$eval(action+"()", {});
+                }
+            }
+
+            $scope.init();
+        }
+    };
+});
+
 /**
  * A helper, internal data structure that acts as a map but also allows getting / removing
  * elements in the LIFO order
@@ -64,7 +148,7 @@ function ($animate ,  $modalStack) {
     return {
         restrict: 'EA',
         replace: true,
-        template: "<div aria-hidden=\"false\" role=\"dialog\" class=\"slds-modal slds-modal--large slds-fade-in-open-backdrop ng-scope\" data-reactid=\".7.0.0\"></div>\n" +
+        template: "<div aria-hidden=\"false\" role=\"dialog\" class=\"slds-modal slds-modal--large slds-fade-in-open-backdrop ng-scope\" ></div>\n" +
     "",
         compile: function (tElement, tAttrs) {
             tElement.addClass(tAttrs.backdropClass);
@@ -94,7 +178,7 @@ function ($modalStack ,  $q ,  $animate) {
         },
         replace: true,
         transclude: true,
-        template:"<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" aria-hidden=\"false\" role=\"dialog\" ng-class=\"size ? 'slds-modal--' + size : ''\" class=\"slds-modal slds-fade-in-open ng-scope\" data-reactid=\".7.0.0\"><div class=\"slds-modal__container\" data-reactid=\".7.0.0.0\" modal-transclude></div></div>",
+        template:"<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" aria-hidden=\"false\" role=\"dialog\" ng-class=\"size ? 'slds-modal--' + size : ''\" class=\"slds-modal slds-fade-in-open ng-scope\" ><div class=\"slds-modal__container\" modal-transclude></div></div>",
 
     //        "<div modal-render=\"{{$isRendered}}\" tabindex=\"-1\" role=\"dialog\" class=\"modal\"\n" +
     //"    modal-animation-class=\"fade\"\n" +
@@ -314,8 +398,11 @@ function ($modalStack ,  $q ,  $animate) {
               keyboard: modal.keyboard
           });
 
-          var body = $document.find('body').eq(0),
+          var parentEl = $document.find('body').eq(0),
               currBackdropIndex = backdropIndex();
+          if (angular.isDefined(modal.appendTo) && angular.isElement(modal.appendTo)) {
+              parentEl = modal.appendTo;
+          }
 
           if (currBackdropIndex >= 0 && !backdropDomEl) {
               backdropScope = $rootScope.$new(true);
@@ -326,7 +413,7 @@ function ($modalStack ,  $q ,  $animate) {
                   angularBackgroundDomEl.attr('modal-animation', 'true');
               }
               backdropDomEl = $compile(angularBackgroundDomEl)(backdropScope);
-              body.append(backdropDomEl);
+              parentEl.append(backdropDomEl);
           }
 
           var angularDomEl = angular.element('<div modal-window="modal-window"></div>');
@@ -344,8 +431,8 @@ function ($modalStack ,  $q ,  $animate) {
           var modalDomEl = $compile(angularDomEl)(modal.scope);
           openedWindows.top().value.modalDomEl = modalDomEl;
           openedWindows.top().value.modalOpener = modalOpener;
-          body.append(modalDomEl);
-          body.addClass(OPENED_MODAL_CLASS);
+          parentEl.append(modalDomEl);
+          parentEl.addClass(OPENED_MODAL_CLASS);
       };
 
       function broadcastClosing(modalWindow, resultOrReason, closing) {
@@ -491,7 +578,8 @@ function ($modalStack ,  $q ,  $animate) {
                           backdropClass: modalOptions.backdropClass,
                           windowClass: modalOptions.windowClass,
                           windowTemplateUrl: modalOptions.windowTemplateUrl,
-                          size: modalOptions.size
+                          size: modalOptions.size,
+                          appendTo: modalOptions.appendTo
                       });
 
                   }, function resolveError(reason) {
@@ -547,7 +635,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
             this.addTab = function (tab) {
                 tabs.push(tab);
                 if (tabs.length == 1 && angular.isUndefined($scope.activeTab)) {
-                    $scope.activeTab = tab.title;
+                    $scope.activeTab = tab.name;
                 }
                 else if (tab.name == $scope.activeTab) {
                     this.activateTab(tab);
