@@ -2,6 +2,7 @@ plautiNgSlds.directive('plautiMenu', function () {
     return {
         restrict: 'E',
         replace: true,
+        transclude:true,
         template:"<div>"
    +"    <div ng-class=\"{'slds-dropdown-trigger':!ngDisabled}\">"
    +"        <button class=\"slds-button slds-button--icon-border-filled\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
@@ -12,15 +13,7 @@ plautiNgSlds.directive('plautiMenu', function () {
    +"        <\/button>"
    +""
    +"        <div class=\"slds-dropdown slds-dropdown--menu\" ng-class=\"getClass()\" ng-hide=\"ngDisabled\">"
-   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" data-reactid=\".8.0.1.0\">"
-   +"                <li class=\"slds-dropdown__item\" ng-repeat=\"menuItem in menuItems\" ng-click=\"$parent.performAction(menuItem.action)\">"
-   +"                    <a href=\"javascript:void(0)\">"
-   +"                        <p class=\"slds-truncate\">{{menuItem.name}}<\/p>"
-   +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"menuItem.iconurl==undefined\">"
-   +"                            <use xlink:href=\"{{menuItem.iconurl}}\"><\/use>"
-   +"                        <\/svg>"
-   +"                    <\/a>"
-   +"                <\/li>"
+   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" data-reactid=\".8.0.1.0\" ng-transclude>"
    +"            <\/ul>"
    +"        <\/div>"
    +"    <\/div>"
@@ -29,11 +22,9 @@ plautiNgSlds.directive('plautiMenu', function () {
         scope: {
             menuTitle: '@',
             menuIcon: '@',
-            menuItems: '=',
             svgPath: '@',
             ngDisabled: '=',
-            position: '@',
-            actionType: '@'
+            position: '@'
         },
         link: function (scope, element, attrs) {
 
@@ -68,16 +59,41 @@ plautiNgSlds.directive('plautiMenu', function () {
                 }
             }
 
-            $scope.performAction = function (action) {
+            $scope.init();
+        }
+    };
+});
+
+plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
+    return {
+        restrict: 'E',
+        replace: true,
+        require: '^plautiMenu',
+        scope: {
+            title: '@',
+            action: '@',
+            actionType: '@',
+            iconurl:'@'
+        },
+        link: function ($scope, element, attrs, menuController) {
+            $scope.performAction = function () {
                 switch ($scope.actionType) {
                     case 'link':
-                        $window.location.href = action;
+                        $window.location.href = $scope.action;
                     case 'click':
-                        $scope.$parent.$eval(action+"()", {});
+                        $scope.$parent.$eval($scope.action + "()", {});
                 }
             }
 
-            $scope.init();
-        }
+        },
+        template:  "<li class=\"slds-dropdown__item\" ng-click=\"performAction()\">"
+   +"                    <a href=\"javascript:void(0)\">"
+   +"                        <p class=\"slds-truncate\">{{title}}<\/p>"
+   +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"iconurl==undefined\">"
+   +"                            <use xlink:href=\"{{iconurl}}\"><\/use>"
+   +"                        <\/svg>"
+   +"                    <\/a>"
+   +"                <\/li>"
+
     };
 });
