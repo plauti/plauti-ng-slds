@@ -5,6 +5,7 @@ plautiNgSlds.directive('plautiMenu', function () {
     return {
         restrict: 'E',
         replace: true,
+        transclude:true,
         template:"<div>"
    +"    <div ng-class=\"{'slds-dropdown-trigger':!ngDisabled}\">"
    +"        <button class=\"slds-button slds-button--icon-border-filled\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
@@ -15,15 +16,7 @@ plautiNgSlds.directive('plautiMenu', function () {
    +"        <\/button>"
    +""
    +"        <div class=\"slds-dropdown slds-dropdown--menu\" ng-class=\"getClass()\" ng-hide=\"ngDisabled\">"
-   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" data-reactid=\".8.0.1.0\">"
-   +"                <li class=\"slds-dropdown__item\" ng-repeat=\"menuItem in menuItems\" ng-click=\"$parent.performAction(menuItem.action)\">"
-   +"                    <a href=\"javascript:void(0)\">"
-   +"                        <p class=\"slds-truncate\">{{menuItem.name}}<\/p>"
-   +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"menuItem.iconurl==undefined\">"
-   +"                            <use xlink:href=\"{{menuItem.iconurl}}\"><\/use>"
-   +"                        <\/svg>"
-   +"                    <\/a>"
-   +"                <\/li>"
+   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" ng-transclude>"
    +"            <\/ul>"
    +"        <\/div>"
    +"    <\/div>"
@@ -32,11 +25,9 @@ plautiNgSlds.directive('plautiMenu', function () {
         scope: {
             menuTitle: '@',
             menuIcon: '@',
-            menuItems: '=',
             svgPath: '@',
             ngDisabled: '=',
-            position: '@',
-            actionType: '@'
+            position: '@'
         },
         link: function (scope, element, attrs) {
 
@@ -71,20 +62,44 @@ plautiNgSlds.directive('plautiMenu', function () {
                 }
             }
 
-            $scope.performAction = function (action) {
-                switch ($scope.actionType) {
-                    case 'link':
-                        $window.location.href = action;
-                    case 'click':
-                        $scope.$parent.$eval(action+"()", {});
-                }
-            }
-
             $scope.init();
         }
     };
 });
 
+plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
+    return {
+        restrict: 'E',
+        replace: true,
+        require: '^plautiMenu',
+        scope: {
+            title: '@',
+            action: '@',
+            actionType: '@',
+            iconurl:'@'
+        },
+        link: function ($scope, element, attrs, menuController) {
+            $scope.performAction = function () {
+                switch ($scope.actionType) {
+                    case 'link':
+                        $window.location.href = $scope.action;
+                    case 'click':
+                        $scope.$parent.$eval($scope.action + "()", {});
+                }
+            }
+
+        },
+        template:  "<li class=\"slds-dropdown__item\" ng-click=\"performAction()\">"
+   +"                    <a href=\"javascript:void(0)\">"
+   +"                        <p class=\"slds-truncate\">{{title}}<\/p>"
+   +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"iconurl==undefined\">"
+   +"                            <use xlink:href=\"{{iconurl}}\"><\/use>"
+   +"                        <\/svg>"
+   +"                    <\/a>"
+   +"                <\/li>"
+
+    };
+});
 /**
  * A helper, internal data structure that acts as a map but also allows getting / removing
  * elements in the LIFO order
@@ -1596,10 +1611,10 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
     + "        <\/div>"
     + "        <ul class=\"slds-lookup__list\" role=\"presentation\">"
     + "            <li class=\"slds-lookup__item\" ng-repeat=\"option in options track by $index\" ng-class=\"{true:'active'}[$index==$parent.activeIndex]\" aria-selected=\"{{$index==$parent.activeIndex}}\">"
-    + "                <a href=\"#\" role=\"option\" ng-click=\"selectOption(option,$event);\">"
+    + "                <a href=\"#\" role=\"option\" ng-click=\"selectOption(option,$event);\" >"
     + "                    <svg aria-hidden=\"true\" class=\"slds-icon {{option[iconCssAttr]}} slds-icon--small\">"
     + "                        <use xlink:href=\"{{option[iconAttr]}}\"><\/use>"
-    + "                    <\/svg>{{option[nameAttr]}}"
+    + "                    <\/svg><span ng-bind-html=\"option[nameAttr]\"/>"
     + "                <\/a>"
     + "            <\/li>"
     + "        <\/ul>"
@@ -1623,7 +1638,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
             typeaheadOptionsMethod: '&',
             typeaheadOnSelect: '&'
         },
-        link: function ($scope, iElm, iAttr, mdlCtrl) {
+        link: function ($scope, iElm, iAttr, mdlCtrl, $sce) {
 
 
             $scope.listElement = angular.element(iElm[0].querySelector('.slds-lookup__list'))[0];
@@ -1639,7 +1654,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.$watch('ngModelDisplay', function (value) {
                 if (angular.isDefined(value)) {
-                    $scope.searchText = value;
+                    $scope.searchText = $sce.trustAsHtml(value);
                 }
                 else if (angular.isUndefined($scope.searchText)||$scope.searchText.length==0) {
                     $scope.searchText = "";
@@ -1662,7 +1677,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 }
             });
         },
-        controller: function ($scope, $document) {
+        controller: function ($scope, $document, $sce) {
             var timeoutPromise;
             var cancelPreviousTimeout = function () {
                 if (timeoutPromise) {
@@ -1776,7 +1791,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.selectOption = function (option, evt) {
                 $scope.ngModel = angular.isDefined($scope.valueAttr) ? option[$scope.valueAttr] : option;
-                $scope.ngModelDisplay = option[$scope.nameAttr];
+                $scope.ngModelDisplay = $sce.trustAsHtml(option[$scope.nameAttr]);
                 $timeout(function () { $scope.typeaheadOnSelect(); });
                 $scope.destroy();
                 evt.stopPropagation();

@@ -1,3 +1,11 @@
+plautiNgSlds.filter("htmlDecode", ['$sce', function($sce) {
+	var div = document.createElement('div');
+    return function(text) {
+        div.innerHTML = text;
+        return $sce.trustAsHtml(div.textContent);
+    };
+}]);
+
 plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
     return {
         restrict: 'E',
@@ -25,10 +33,10 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
     + "        <\/div>"
     + "        <ul class=\"slds-lookup__list\" role=\"presentation\">"
     + "            <li class=\"slds-lookup__item\" ng-repeat=\"option in options track by $index\" ng-class=\"{true:'active'}[$index==$parent.activeIndex]\" aria-selected=\"{{$index==$parent.activeIndex}}\">"
-    + "                <a href=\"#\" role=\"option\" ng-click=\"selectOption(option,$event);\">"
+    + "                <a href=\"#\" role=\"option\" ng-click=\"selectOption(option,$event);\" >"
     + "                    <svg aria-hidden=\"true\" class=\"slds-icon {{option[iconCssAttr]}} slds-icon--small\">"
     + "                        <use xlink:href=\"{{option[iconAttr]}}\"><\/use>"
-    + "                    <\/svg>{{option[nameAttr]}}"
+    + "                    <\/svg><span ng-bind-html=\"option[nameAttr]\"/>"
     + "                <\/a>"
     + "            <\/li>"
     + "        <\/ul>"
@@ -68,7 +76,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.$watch('ngModelDisplay', function (value) {
                 if (angular.isDefined(value)) {
-                    $scope.searchText = value;
+                    $scope.searchText = $scope.sanitize(value);
                 }
                 else if (angular.isUndefined($scope.searchText)||$scope.searchText.length==0) {
                     $scope.searchText = "";
@@ -91,7 +99,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 }
             });
         },
-        controller: function ($scope, $document) {
+        controller: function ($scope, $document, $sce, $filter) {
             var timeoutPromise;
             var cancelPreviousTimeout = function () {
                 if (timeoutPromise) {
@@ -115,6 +123,9 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 $scope.searchSvgUrl = $scope.svgPath + "#search";
                 $scope.spinnerSvgUrl = $scope.svgPath + "#spinner";
 
+            }
+            $scope.sanitize = function(value) {
+            	return $filter('htmlDecode')(value);
             }
             $scope.queryChanged = function () {
 
@@ -205,7 +216,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.selectOption = function (option, evt) {
                 $scope.ngModel = angular.isDefined($scope.valueAttr) ? option[$scope.valueAttr] : option;
-                $scope.ngModelDisplay = option[$scope.nameAttr];
+                $scope.ngModelDisplay = $sce.trustAsHtml(option[$scope.nameAttr]);
                 $timeout(function () { $scope.typeaheadOnSelect(); });
                 $scope.destroy();
                 evt.stopPropagation();
