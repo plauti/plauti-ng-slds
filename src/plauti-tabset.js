@@ -35,7 +35,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
                     $scope.activeTab = tab.name;
                 }
                 else if (tab.name == $scope.activeTab) {
-                    this.activateTab(tab);
+                	$scope.activeTab = tab.name;
                 }
 
             };

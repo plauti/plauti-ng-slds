@@ -1,4 +1,4 @@
-/*! plauti-ng-slds 0.0.1 2016-02-08 GPL-3.0 
+/*! plauti-ng-slds 0.0.1 2016-02-25 GPL-3.0 
 Angular Directives for Lightning Design System */
 var plautiNgSlds = angular.module("plauti-ng-slds", []);
 plautiNgSlds.directive('plautiMenu', function () {
@@ -8,9 +8,9 @@ plautiNgSlds.directive('plautiMenu', function () {
         transclude:true,
         template:"<div>"
    +"    <div ng-class=\"{'slds-dropdown-trigger':!ngDisabled}\">"
-   +"        <button class=\"slds-button slds-button--icon-border-filled\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
-   +"            <span>{{menuTitle}}<\/span>"
-   +"            <svg aria-hidden=\"true\" class=\"slds-button__icon slds-button__icon--hint\" ng-show=\"menuIconVisible\">"
+   +"        <button class=\"slds-button \" ng-class=\"{'slds-button--icon-x-small': menuSize=='small', 'slds-button--icon-border-filled': !isInverse, 'slds-button--inverse' : isInverse}\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
+   +"            <span ng-bind-html=\"menuTitle\"/>"
+   +"            <svg aria-hidden=\"true\" class=\"slds-button__icon\" ng-class=\"{'slds-button__icon--small': menuSize=='small', 'slds-button__icon--hint': !isInverse, 'slds-button--icon-inverse' : isInverse}\" ng-show=\"menuIconVisible\">"
    +"                <use xlink:href=\"{{menuIconPath}}\"><\/use>"
    +"            <\/svg>"
    +"        <\/button>"
@@ -27,7 +27,9 @@ plautiNgSlds.directive('plautiMenu', function () {
             menuIcon: '@',
             svgPath: '@',
             ngDisabled: '=',
-            position: '@'
+            position: '@',
+            menuSize: '@',
+            inverse: '@'
         },
         link: function (scope, element, attrs) {
 
@@ -36,13 +38,23 @@ plautiNgSlds.directive('plautiMenu', function () {
             $scope.init = function () {
                 if (angular.isUndefined($scope.svgPath)) {
                     $scope.svgPath = "/assets/icons/utility-sprite/svg/symbols.svg";
-                }
+                };
 
                 if (angular.isDefined($scope.menuIcon)) {
                     $scope.menuIconVisible = true;
                     $scope.menuIconPath = $scope.svgPath + "#" + $scope.menuIcon;
-                }
-            }
+                };
+                
+                if (angular.isDefined($scope.inverse) && $scope.inverse) {
+                	$scope.isInverse = true;
+                } else {
+                	$scope.isInverse = false;
+                };
+                
+                if (angular.isUndefined($scope.menuSize)) {
+                	$scope.menuSize="normal";
+                };
+            };
 
             $scope.getClass = function () {
                 switch ($scope.position) {
@@ -59,8 +71,8 @@ plautiNgSlds.directive('plautiMenu', function () {
                     case 'bottomRight':
                         return 'slds-dropdown--right';
 
-                }
-            }
+                };
+            };
 
             $scope.init();
         }
@@ -76,21 +88,20 @@ plautiNgSlds.directive('plautiMenuItem', function ($timeout,$window) {
             title: '@',
             action: '@',
             actionType: '@',
-            iconurl:'@'
+            iconurl: '@',
+            href: '@',
+            uiSref:'@'
         },
         link: function ($scope, element, attrs, menuController) {
-            $scope.performAction = function () {
-                switch ($scope.actionType) {
-                    case 'link':
-                        $window.location.href = $scope.action;
-                    case 'click':
-                        $scope.$parent.$eval($scope.action + "()", {});
-                }
+		
+            if(angular.isUndefined($scope.href))
+            {
+                $scope.href = "javascript:void(0);"
             }
 
         },
-        template:  "<li class=\"slds-dropdown__item\" ng-click=\"performAction()\">"
-   +"                    <a href=\"javascript:void(0)\">"
+        template:  "<li class=\"slds-dropdown__item\" >"
+   +"                    <a href=\"{{href}}\">"
    +"                        <p class=\"slds-truncate\">{{title}}<\/p>"
    +"                        <svg aria-hidden=\"true\" class=\"slds-icon slds-icon--x-small slds-icon-text-default slds-m-left--small slds-shrink-none\" ng-hide=\"iconurl==undefined\">"
    +"                            <use xlink:href=\"{{iconurl}}\"><\/use>"
@@ -653,7 +664,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
                     $scope.activeTab = tab.name;
                 }
                 else if (tab.name == $scope.activeTab) {
-                    this.activateTab(tab);
+                	$scope.activeTab = tab.name;
                 }
 
             };
@@ -1584,6 +1595,14 @@ plautiNgSlds.directive('plautiDatetimepicker', function ($log,$timeout) {
     };
 
 });
+plautiNgSlds.filter("htmlDecode", ['$sce', function($sce) {
+	var div = document.createElement('div');
+    return function(text) {
+        div.innerHTML = text;
+        return $sce.trustAsHtml(div.textContent);
+    };
+}]);
+
 plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
     return {
         restrict: 'E',
@@ -1638,7 +1657,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
             typeaheadOptionsMethod: '&',
             typeaheadOnSelect: '&'
         },
-        link: function ($scope, iElm, iAttr, mdlCtrl, $sce) {
+        link: function ($scope, iElm, iAttr, mdlCtrl) {
 
 
             $scope.listElement = angular.element(iElm[0].querySelector('.slds-lookup__list'))[0];
@@ -1654,7 +1673,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
 
             $scope.$watch('ngModelDisplay', function (value) {
                 if (angular.isDefined(value)) {
-                    $scope.searchText = $sce.trustAsHtml(value);
+                    $scope.searchText = $scope.sanitize(value);
                 }
                 else if (angular.isUndefined($scope.searchText)||$scope.searchText.length==0) {
                     $scope.searchText = "";
@@ -1677,7 +1696,7 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 }
             });
         },
-        controller: function ($scope, $document, $sce) {
+        controller: function ($scope, $document, $sce, $filter) {
             var timeoutPromise;
             var cancelPreviousTimeout = function () {
                 if (timeoutPromise) {
@@ -1701,6 +1720,9 @@ plautiNgSlds.directive("plautiTypeahead", function ($timeout,$log) {
                 $scope.searchSvgUrl = $scope.svgPath + "#search";
                 $scope.spinnerSvgUrl = $scope.svgPath + "#spinner";
 
+            }
+            $scope.sanitize = function(value) {
+            	return $filter('htmlDecode')(value);
             }
             $scope.queryChanged = function () {
 

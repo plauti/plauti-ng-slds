@@ -5,15 +5,15 @@ plautiNgSlds.directive('plautiMenu', function () {
         transclude:true,
         template:"<div>"
    +"    <div ng-class=\"{'slds-dropdown-trigger':!ngDisabled}\">"
-   +"        <button class=\"slds-button slds-button--icon-border-filled\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
-   +"            <span>{{menuTitle}}<\/span>"
-   +"            <svg aria-hidden=\"true\" class=\"slds-button__icon slds-button__icon--hint\" ng-show=\"menuIconVisible\">"
+   +"        <button class=\"slds-button \" ng-class=\"{'slds-button--icon-x-small': menuSize=='small', 'slds-button--icon-border-filled': !isInverse, 'slds-button--inverse' : isInverse}\" style=\"width: auto; padding: 0 4px;\" ng-disabled=\"ngDisabled\">"
+   +"            <span ng-bind-html=\"menuTitle\"/>"
+   +"            <svg aria-hidden=\"true\" class=\"slds-button__icon\" ng-class=\"{'slds-button__icon--small': menuSize=='small', 'slds-button__icon--hint': !isInverse, 'slds-button--icon-inverse' : isInverse}\" ng-show=\"menuIconVisible\">"
    +"                <use xlink:href=\"{{menuIconPath}}\"><\/use>"
    +"            <\/svg>"
    +"        <\/button>"
    +""
    +"        <div class=\"slds-dropdown slds-dropdown--menu\" ng-class=\"getClass()\" ng-hide=\"ngDisabled\">"
-   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" data-reactid=\".8.0.1.0\" ng-transclude>"
+   +"            <ul class=\"slds-dropdown__list\" role=\"menu\" ng-transclude>"
    +"            <\/ul>"
    +"        <\/div>"
    +"    <\/div>"
@@ -24,7 +24,9 @@ plautiNgSlds.directive('plautiMenu', function () {
             menuIcon: '@',
             svgPath: '@',
             ngDisabled: '=',
-            position: '@'
+            position: '@',
+            menuSize: '@',
+            inverse: '@'
         },
         link: function (scope, element, attrs) {
 
@@ -33,13 +35,23 @@ plautiNgSlds.directive('plautiMenu', function () {
             $scope.init = function () {
                 if (angular.isUndefined($scope.svgPath)) {
                     $scope.svgPath = "/assets/icons/utility-sprite/svg/symbols.svg";
-                }
+                };
 
                 if (angular.isDefined($scope.menuIcon)) {
                     $scope.menuIconVisible = true;
                     $scope.menuIconPath = $scope.svgPath + "#" + $scope.menuIcon;
-                }
-            }
+                };
+                
+                if (angular.isDefined($scope.inverse) && $scope.inverse) {
+                	$scope.isInverse = true;
+                } else {
+                	$scope.isInverse = false;
+                };
+                
+                if (angular.isUndefined($scope.menuSize)) {
+                	$scope.menuSize="normal";
+                };
+            };
 
             $scope.getClass = function () {
                 switch ($scope.position) {
@@ -56,8 +68,8 @@ plautiNgSlds.directive('plautiMenu', function () {
                     case 'bottomRight':
                         return 'slds-dropdown--right';
 
-                }
-            }
+                };
+            };
 
             $scope.init();
         }
