@@ -1,4 +1,4 @@
-/*! plauti-ng-slds 0.0.1 2016-02-25 GPL-3.0 
+/*! plauti-ng-slds 0.0.1 2016-05-03 GPL-3.0 
 Angular Directives for Lightning Design System */
 var plautiNgSlds = angular.module("plauti-ng-slds", []);
 plautiNgSlds.directive('plautiMenu', function () {
@@ -651,7 +651,7 @@ plautiNgSlds.directive('plautiTabset', function ($compile, $timeout) {
                 if (angular.isUndefined(newValue))
                     return;
 
-                var tabToActivate = $filter('filter')($scope.tabs, { name: newValue });
+                var tabToActivate = $filter('filter')($scope.tabs, { name: newValue }, true);
                 if (tabToActivate.length == 1) {
                     $scope.activateTab(tabToActivate[0]);
                 };
